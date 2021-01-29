@@ -21,6 +21,7 @@ use openssl::pkey::{self, PKey};
 use std::sync::Arc;
 use std::thread;
 use std::time::Duration;
+use std::collections::HashSet;
 
 use crate::acc::AccountInner;
 use crate::api::{ApiAuth, ApiEmptyString, ApiFinalize, ApiOrder, ApiProblem};
@@ -160,11 +161,15 @@ impl<P: Persist> NewOrder<P> {
     /// list might contain a mix of already valid and not yet valid auths.
     pub fn authorizations(&self) -> Result<Vec<Auth<P>>> {
         let mut result = vec![];
+        let mut dedup_names = HashSet::new();
         if let Some(authorizations) = &self.order.api_order.authorizations {
             for auth_url in authorizations {
-                let mut res = self.order.inner.transport.call(auth_url, &ApiEmptyString)?;
-                let api_auth: ApiAuth = read_json(&mut res)?;
-                result.push(Auth::new(&self.order.inner, api_auth, auth_url));
+                if ! dedup_names.contains(auth_url) {
+                    dedup_names.insert(auth_url.to_owned());
+                    let mut res = self.order.inner.transport.call(auth_url, &ApiEmptyString)?;
+                    let api_auth: ApiAuth = read_json(&mut res)?;
+                    result.push(Auth::new(&self.order.inner, api_auth, auth_url));
+                }
             }
         }
         Ok(result)
