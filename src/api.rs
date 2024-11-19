@@ -52,7 +52,7 @@ impl ApiProblem {
             && self
                 .detail
                 .as_ref()
-                .map(|s| s == "JWS verification error")
+                .map(|s| s.contains("JWS verification error"))
                 .unwrap_or(false)
     }
 }
