@@ -63,7 +63,6 @@ pub(crate) fn req_handle_error(rt: reqwest::Result<reqwest::blocking::Response>)
                         subproblems: None,
                     }
                 };
-
                 Err(problem)
             }
         }
