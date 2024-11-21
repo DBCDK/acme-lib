@@ -52,7 +52,7 @@ impl ApiProblem {
             && self
                 .detail
                 .as_ref()
-                .map(|s| s == "JWS verification error")
+                .map(|s| s.contains("JWS verification error"))
                 .unwrap_or(false)
     }
 }
@@ -119,7 +119,8 @@ impl ApiDirectoryMeta {
 pub struct ApiAccount {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub status: Option<String>,
-    pub contact: Vec<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub contact: Option<Vec<String>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub termsOfServiceAgreed: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]

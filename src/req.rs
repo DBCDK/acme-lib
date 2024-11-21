@@ -39,7 +39,7 @@ pub(crate) fn req_handle_error(rt: reqwest::Result<reqwest::blocking::Response>)
             // ok responses pass through
             Ok(_) => Ok(res),
             Err(_err) => {
-                let problem = if res.headers()[reqwest::header::CONTENT_TYPE] == "application/problem+json" {
+                let problem = if res.headers().get(reqwest::header::CONTENT_TYPE).map_or(false, |ct| ct.to_str().map_or(false, |s| s.contains("application/problem+json"))) {
                     // if we were sent a problem+json, deserialize it
                     let body = req_safe_read_body(res);
                     serde_json::from_str(&body).unwrap_or_else(|e| ApiProblem {
@@ -63,7 +63,6 @@ pub(crate) fn req_handle_error(rt: reqwest::Result<reqwest::blocking::Response>)
                         subproblems: None,
                     }
                 };
-
                 Err(problem)
             }
         }
